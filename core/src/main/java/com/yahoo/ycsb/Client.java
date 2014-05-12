@@ -32,6 +32,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Vector;
+import com.yahoo.ycsb.ZKSyncPrimitive.ZKBarrier;
 
 //import org.apache.log4j.BasicConfigurator;
 
@@ -335,6 +336,12 @@ public class Client
 
 	public static final String WORKLOAD_PROPERTY="workload";
 	
+	public static final String ENABLE_MULTI_CLIENTS="clientsCoordination";
+	
+	public static final String ZOOKEEPER_ADDRESS="zkAddress";
+
+    public static final String ZOOKEEPER_ROOT="zkRoot";
+	
 	/**
 	 * Indicates how many inserts to do, if less than recordcount. Useful for partitioning
 	 * the load among multiple servers, if the client is the bottleneck. Additionally, workloads
@@ -382,6 +389,16 @@ public class Client
 			System.out.println("Missing property: "+WORKLOAD_PROPERTY);
 			return false;
 		}
+		
+		if (props.getProperty(ENABLE_MULTI_CLIENTS)!=null) {
+ 		    if (props.getProperty(ZOOKEEPER_ADDRESS)==null) {
+ 				System.out.println("Missing property: "+ZOOKEEPER_ADDRESS);
+ 				return false;
+ 			} else if (props.getProperty(ZOOKEEPER_ROOT)==null) {
+ 				System.out.println("Missing property: "+ZOOKEEPER_ROOT);
+ 				return false;
+ 			}
+ 		}		
 
 		return true;
 	}
@@ -447,6 +464,11 @@ public class Client
 		int target=0;
 		boolean status=false;
 		String label="";
+				
+ 		boolean clientsCoordination = false;
+ 		int clientsGroupSize = 1;
+ 		String zkAddress;
+ 		String zkRoot;
 
 		//parse arguments
 		int argindex=0;
@@ -616,7 +638,9 @@ public class Client
 		//get number of threads, target and db
 		threadcount=Integer.parseInt(props.getProperty("threadcount","1"));
 		dbname=props.getProperty("db","com.yahoo.ycsb.BasicDB");
-		target=Integer.parseInt(props.getProperty("target","0"));
+		target=Integer.parseInt(props.getProperty("target","0"));	
+		clientsCoordination=Boolean.parseBoolean(props.getProperty(ENABLE_MULTI_CLIENTS, "false"));
+ 		clientsGroupSize=Integer.parseInt(props.getProperty("groupSize", "1"));
 		
 		//compute the target throughput
 		double targetperthreadperms=-1;
@@ -693,6 +717,23 @@ public class Client
 		//run the workload
 
 		System.err.println("Starting test.");
+
+		ZKSyncPrimitive zkSync = null;
+ 		ZKBarrier zkBarrier = null;
+ 		
+ 		if (clientsCoordination) {
+ 			System.err.println("Multi-client coordination is enabled");
+ 			zkSync = new ZKSyncPrimitive(props.getProperty(ZOOKEEPER_ADDRESS));
+ 			zkBarrier = zkSync.new ZKBarrier(props.getProperty(ZOOKEEPER_ADDRESS), 
+ 					props.getProperty(ZOOKEEPER_ROOT), clientsGroupSize);
+ 			try {
+ 				zkBarrier.enter();
+ 			} catch (Exception ex) {
+ 				System.out.println(ex.toString());
+ 				System.exit(0);
+ 			}
+ 			System.err.println("All clients are ready. Begin test.");
+ 		}		
 
 		int opcount;
 		if (dotransactions)
@@ -794,6 +835,16 @@ public class Client
 			e.printStackTrace(System.out);
 			System.exit(0);
 		}
+		
+ 		if (clientsCoordination) {
+ 			try {
+ 				zkBarrier.leave();
+ 			} catch (Exception ex) {
+ 				System.out.println(ex.toString());
+ 				System.exit(0);
+ 			}
+ 			System.err.println("All clients finish the test.");
+ 		}
 
 		try
 		{
