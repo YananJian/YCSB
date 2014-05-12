@@ -19,7 +19,7 @@ Find Best Performance:
 We provide the tool 'find_best_performance.py' to find the best throughput of a database with the fastest speed. 
 
 1. Run "python find_best_performance.py [your normal YCSB commands]"
-Example: "python find_best_performance.py ycsb-0.1.4/bin/ycsb run hbase -P ycsb-0.1.4/workloads/workloada -p columnfamily=family -p operationcount=10000 -p recordcount=10000  -p threadcount=0"
+Example: "python find_best_performance.py ycsb-0.1.4/bin/ycsb run hbase -P ycsb-0.1.4/workloads/workloada -p columnfamily=family -p operationcount=10000 -p recordcount=10000"
 2. It will print progress during benchmark, however if there's nothing printed out for long, you may want to check the 'test.err' file under the dir ycsbtest/ 
 3. You can hit 'ctrl+c' anytime during benchmarking. It will stop all ycsb processes on all test machines.
 4. When benchmark is over, you'll see [Conclusion] printed out on your terminal, which shows the 'thread per test machine', the best 'throughput' under the current load and the number of test machines.
