@@ -123,7 +123,7 @@ def getRunCommand(command=""):
 def test(arguments=""):
 	global ycsb_arguments
 	ycsb_arguments = arguments
-	config = loadConfigFile("fab_config.cfg")
+	config = loadConfigFile("multiclient_config.cfg")
 	execute(deploy)
 	execute(runTest)
 	execute(getLog)

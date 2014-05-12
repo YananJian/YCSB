@@ -151,7 +151,7 @@ def get_org_YCSB_arg(arguments=""):
 def test(arguments=""):
 	global ycsb_arguments
         global thread_ct
-	config = loadConfigFile("fab_config.cfg")
+	config = loadConfigFile("multiclient_config.cfg")
 	execute(deploy)
         thread_ct = 1
         drop_threshould = 1

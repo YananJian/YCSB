@@ -9,9 +9,9 @@ Getting started with this auto-deploy script for running YCSB on multiple server
 
 1. Get the latest version for YCSB, or compile the dev version of YCSB
 2. Put the multiclient_test.py and multiclient_config.cfg file into the same folder as the ycsb distribution tar file
-3. Change the fab_config file according to your testing environment
-4. Run "python fabfile.py [your normal YCSB commands]"
-Example: python fabfile.py ycsb-0.1.4/bin/ycsb run redis -P ycsb-0.1.4/workloads/workloada -p redis.host=localhost -p redis.port=6379
+3. Change the multiclient_config file according to your testing environment
+4. Run "python multiclient_test.py [your normal YCSB commands]"
+Example: python multiclient_test.py ycsb-0.1.4/bin/ycsb run redis -P ycsb-0.1.4/workloads/workloada -p redis.host=localhost -p redis.port=6379
 
 The default result file is "test.output" 
 
