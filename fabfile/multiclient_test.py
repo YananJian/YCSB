@@ -139,6 +139,7 @@ def build():
 #
 # Copy all necessary files to all testing machines
 #
+@parallel
 def deploy():
 	global root
 	global neededFiles
